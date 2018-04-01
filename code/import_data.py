@@ -1,31 +1,31 @@
 import numpy as np
 import pandas as pd
-import geopandas as geo
 import matplotlib.pyplot as plt
-from matplotlib.animation import FuncAnimation
+from sklearn import linear_model
 
-subway_data_list = ['../data/turnstile_17{}.txt'.format(x) 
-					for x in [1125,1202,1209,1223,1230]
-				   ]
+# subway_data_list = ['../data/turnstile_17{}.txt'.format(x) 
+#                   for x in [1125,1202,1209,1223,1230]
+#                  ]
 
-dfs = {'taxi': pd.read_csv('../data/yellow_tripdata_2017-12.csv'),
-	   'subway': pd.concat([pd.read_csv(file) for file in subway_data_list]),
-	   'weather': pd.read_csv('../data/noaa_hourly.csv'),
-	   'shapes': geo.read_file('../data/zones/taxi_zones.shp')
-	  }
+dfs = {'taxi': pd.read_csv('../data/yellow_tripdata_2017-12.csv', index_col='tpep_pickup_datetime', parse_dates=True, infer_datetime_format=True),
+       # 'subway': pd.concat([pd.read_csv(file) for file in subway_data_list]),
+       'weather': pd.read_csv('../data/1260113.csv', index_col='DATE', parse_dates=True, infer_datetime_format=True)
+       # 'shapes': geo.read_file('../data/zones/taxi_zones.shp')
+      }
 
-# dfs['shapes'].plot()
-# plt.axis('off')
-# plt.show()
+dfs['taxi'] = dfs['taxi']['2017-12-01':'2018-01-01']
+                              dfs['taxi'].total_amount < 300]
+dfs['taxi_agg'] = dfs['taxi'][['tpep_dropoff_datetime', 'total_amount']]
+dfs['taxi_agg'] = dfs['taxi_agg'].resample('1H').count()['total_amount']
 
-# print(dfs['weather'].head())
-# print(dfs['taxi'].head())
-# print(dfs['subway'].head())
+dfo = pd.DataFrame(pd.date_range('2017-12-01', '2017-12-31', freq='H'))
+
+raise SystemExit
 dfs['taxi']['hour'] = dfs['taxi'].tpep_pickup_datetime.apply(lambda x: x[11:13])\
-                        							  .astype('uint8')
+                                                      .astype('uint8')
 taxi_dfo = dfs['taxi'][['PULocationID','hour','total_amount']]\
-				.groupby(['PULocationID', 'hour'])\
-			    .count()\
+                .groupby(['PULocationID', 'hour'])\
+                .count()\
                 .reset_index()
 taxi_dfo.set_index('PULocationID')
 
